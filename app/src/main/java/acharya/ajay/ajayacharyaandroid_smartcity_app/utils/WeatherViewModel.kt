@@ -12,20 +12,23 @@ import kotlinx.coroutines.launch
 
 class WeatherViewModel : ViewModel() {
 
-    var weatherData by mutableStateOf<WeatherResponse?>(null)
-    var loading by mutableStateOf(false)
-    var error by mutableStateOf("")
+    var weatherState by mutableStateOf<WeatherResponse?>(null)
+        private set
 
-    fun loadWeather(city: String, apiKey: String) {
+    init {
+        getWeather()
+    }
+
+    private fun getWeather() {
         viewModelScope.launch {
-            loading = true
-            error = ""
             try {
-                weatherData = RetrofitClient.api.getWeather(city, apiKey)
+                val response = RetrofitClient.api.getWeather(
+                    city = "Bangalore",
+                    apiKey = "d9d5a91176c696462990ee0e31100769" // Replace with your OpenWeatherMap API key
+                )
+                weatherState = response
             } catch (e: Exception) {
-                error = "Failed to load weather"
-            } finally {
-                loading = false
+                Log.e("WeatherError", e.toString())
             }
         }
     }

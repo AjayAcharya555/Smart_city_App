@@ -2,16 +2,13 @@ package acharya.ajay.ajayacharyaandroid_smartcity_app.model
 
 data class WeatherResponse(
     val main: Main,
-    val weather: List<Weather>,
-    val name: String
+    val weather: List<Weather>
 )
 
 data class Main(
-    val temp: Float,
-    val humidity: Int
+    val temp: Double
 )
 
 data class Weather(
-    val description: String,
-    val icon: String
+    val description: String
 )

@@ -52,6 +52,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2")
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
+    implementation ("androidx.navigation:navigation-compose:2.7.0")
+    implementation ("androidx.compose.material:material-icons-extended")
 
     implementation("androidx.compose.runtime:runtime-livedata:1.6.6")
     implementation("io.coil-kt:coil-compose:2.6.0")

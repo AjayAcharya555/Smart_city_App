@@ -1,5 +1,9 @@
 package acharya.ajay.ajayacharyaandroid_smartcity_app
 
+import acharya.ajay.ajayacharyaandroid_smartcity_app.utils.Screen
+import acharya.ajay.ajayacharyaandroid_smartcity_app.utils.WeatherViewModel
+import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -34,43 +38,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun WeatherPage() {
+fun SmartCityHubScreen(viewModel: WeatherViewModel, navController: NavController?) {
+    val weather = viewModel.weatherState
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
+
+
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        ){
             Text("Smart City Hub", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Icon(Icons.Default.Settings, contentDescription = "Settings")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Quick Stats Section
+        Spacer(modifier = Modifier.height(26.dp))
+// Quick Stats Section
         Text("Quick Stats", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            QuickStatCard(icon = Icons.Default.Star, title = "21°", subtitle = "Sunny")
+            QuickStatCard(icon = Icons.Default.Star, title = "${weather?.main?.temp ?: "--"}°C", subtitle = (weather?.weather?.firstOrNull()?: "Loading").toString())
             QuickStatCard(icon = Icons.Default.LocationOn, title = "AQI", subtitle = "Moderate")
-            QuickStatCard(icon = Icons.Default.Place, title = "Traffic", subtitle = "")
+            QuickStatCard(icon = Icons.Default.Info, title = "Traffic", subtitle = "Normal")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         // Services Grid
         LazyVerticalGrid(
@@ -82,21 +93,32 @@ fun WeatherPage() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             content = {
                 item {
-                    ServiceCard(icon = Icons.Default.Face, title = "Public Transport")
+                    ServiceCard(icon = Icons.Default.Favorite, title = "Public Transport",
+                        onClick = { navController?.navigate(Screen.PublicTransport.route) })
                 }
                 item {
-                    ServiceCard(icon = Icons.Default.Add, title = "Emergency Services")
+                    ServiceCard(
+                        icon = Icons.Default.Add,
+                        title = "Emergency Services",
+                        onClick = { navController?.navigate(Screen.Emergency.route) }
+                    )
                 }
                 item {
-                    ServiceCard(icon = Icons.Default.Delete, title = "Waste Mgmt.")
+                    ServiceCard(
+                        icon = Icons.Default.Delete,
+                        title = "Waste Mgmt."
+                    ) { navController?.navigate(Screen.PublicTransport.route) }
                 }
                 item {
-                    ServiceCard(icon = Icons.Default.DateRange, title = "City Events")
+                    ServiceCard(
+                        icon = Icons.Default.DateRange,
+                        title = "City Events"
+                    ) { navController?.navigate(Screen.PublicTransport.route) }
                 }
             }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Alerts Section
         Text("City Alerts", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -110,7 +132,7 @@ fun WeatherPage() {
 fun QuickStatCard(icon: ImageVector, title: String, subtitle: String) {
     Card(
         modifier = Modifier
-           // .weight(1f)
+
             .padding(horizontal = 4.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -120,25 +142,26 @@ fun QuickStatCard(icon: ImageVector, title: String, subtitle: String) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(icon, contentDescription = null, tint = Color.Black)
-            Text(title, fontWeight = FontWeight.Bold)
+            Text(title, fontWeight = FontWeight.Bold, )
             if (subtitle.isNotEmpty()) {
-                Text(subtitle, fontSize = 12.sp, color = Color.Gray)
+                Text(subtitle, fontSize = 12.sp, color = Color.Gray, overflow = TextOverflow.Ellipsis, maxLines = 1)
             }
         }
     }
 }
 
 @Composable
-fun ServiceCard(icon: ImageVector, title: String) {
+fun ServiceCard(icon: ImageVector, title: String, onClick: () -> Unit?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(12.dp)
+                .clickable { onClick() }
                 .fillMaxWidth()
         ) {
             Icon(icon, contentDescription = title, tint = Color.Black)
@@ -161,9 +184,10 @@ fun AlertItem(title: String, description: String) {
     }
 }
 
-
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 @Preview(showBackground = true)
-fun WeatherPagePreview() {
-    WeatherPage()
+fun SmartCityHubScreenPreview() {
+    val navController = null
+    SmartCityHubScreen(viewModel = WeatherViewModel(), navController = navController)
 }
